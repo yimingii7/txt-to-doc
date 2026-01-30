@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>TXT ⇄ DOC 转换</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  font-family: system-ui, -apple-system;
+  background: #f3f3f3;
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.box {
+  background: #fff;
+  width: 90%;
+  max-width: 380px;
+  padding: 24px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.1);
+  text-align: center;
+}
+h2 {
+  margin-bottom: 20px;
+}
+.section {
+  margin-bottom: 20px;
+}
+input[type="file"] {
+  width: 100%;
+  margin-top: 10px;
+}
+button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #000;
+  color: #fff;
+  font-size: 16px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>TXT ⇄ DOC 转换</h2>
+
+  <div class="section">
+    <strong>TXT → DOC</strong>
+    <input type="file" id="txtInput" accept=".txt">
+    <button onclick="txtToDoc()">转换为 DOC</button>
+  </div>
+
+  <div class="section">
+    <strong>DOC → TXT</strong>
+    <input type="file" id="docInput" accept=".doc">
+    <button onclick="docToTxt()">转换为 TXT</button>
+  </div>
+</div>
+
+<script>
+function txtToDoc() {
+  const file = document.getElementById('txtInput').files[0];
+  if (!file) {
+    alert('请选择 TXT 文件');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    const html = `
+      <html><head><meta charset="UTF-8"></head>
+      <body>${text.replace(/\n/g, '<br>')}</body></html>
+    `;
+    const blob = new Blob([html], { type: 'application/msword' });
+    download(blob, file.name.replace('.txt', '.doc'));
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function docToTxt() {
+  const file = document.getElementById('docInput').files[0];
+  if (!file) {
+    alert('请选择 DOC 文件');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const html = e.target.result
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ');
+    const blob = new Blob([html], { type: 'text/plain' });
+    download(blob, file.name.replace('.doc', '.txt'));
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function download(blob, filename) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
+
+</body>
+</html>
