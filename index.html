@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>TXT 转 Word</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont;
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 24px;
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+    input, button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+    }
+    button {
+      background: #38bdf8;
+      color: #020617;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<h1>TXT → Word（稳定版）</h1>
+
+<input type="file" id="file" accept=".txt" />
+<button onclick="convert()">转换并下载</button>
+
+<script>
+function convert() {
+  const fileInput = document.getElementById("file");
+  if (!fileInput.files.length) {
+    alert("请选择 TXT 文件");
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function () {
+    const text = reader.result
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\n/g, "<br>");
+
+    const html = `
+      <html>
+      <head>
+        <meta charset="UTF-8">
+      </head>
+      <body>
+        ${text}
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([html], { type: "application/msword" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.name.replace(/\.txt$/i, ".doc");
+    a.click();
+
+    URL.revokeObjectURL(url);
+  };
+
+  reader.readAsText(file, "utf-8");
+}
+</script>
+
+</body>
+</html>
